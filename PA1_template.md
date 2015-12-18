@@ -1,14 +1,6 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
-```{r, echo=FALSE}
-# Set default numeric round to 2 digits
-options(scipen = 1, digits = 2)
-```
+
 
 The R markdown contains the answer of the Peer Assessment 1 from the Johns Hopkins Reproducible Reasearch courses.  
 This file can be found in the github repository [mtarantino/RepData_PeerAssessment1](https://github.com/mtarantino/RepData_PeerAssessment1) which was originally
@@ -20,7 +12,8 @@ forked from the repository [rdpeng/RepData_PeerAssessment1](https://github.com/r
 
 Data are loaded using *read.table()*. 
 
-```{r readfile}
+
+```r
 library(data.table)
 setwd("~/Dev/DataScience/ReproducibleResearch/week2/RepData_PeerAssessment1")
 activity <- read.table("activity.csv", header = TRUE, sep = ",")
@@ -29,25 +22,48 @@ activity <- read.table("activity.csv", header = TRUE, sep = ",")
 #### 2. Process/transform the data (if necessary) into a format suitable for your analysis  
 
 The date being intially set as a factor, this column will be converted to a date class.  
-Usually, during this steps the *NA* are also processes but as this will be tackle in the section **Imputing missing values**,
-we don't need to do it in during this phase.
-```{r preprocessing}
+Usually, during this steps the *NA* are also processe but as this will be tackle in the section **Imputing missing values**,
+we don't need to do it in during this preprocessing.
+
+```r
 # Convert dates into a date type
 activity$date <- as.Date(activity$date)
-
 ```
 
 Find below a quick summary of the data from the activity table  
-```{r summary}
+
+```r
 summary(activity)
+```
+
+```
+##      steps           date               interval   
+##  Min.   :  0    Min.   :2012-10-01   Min.   :   0  
+##  1st Qu.:  0    1st Qu.:2012-10-16   1st Qu.: 589  
+##  Median :  0    Median :2012-10-31   Median :1178  
+##  Mean   : 37    Mean   :2012-10-31   Mean   :1178  
+##  3rd Qu.: 12    3rd Qu.:2012-11-15   3rd Qu.:1766  
+##  Max.   :806    Max.   :2012-11-30   Max.   :2355  
+##  NA's   :2304
+```
+
+```r
 str(activity)
+```
+
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : Date, format: "2012-10-01" "2012-10-01" ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
 ```
 
 ## What is mean total number of steps taken per day?
 
 #### 1. Calculate the total number of steps taken per day  
 To calculate the mean total number of steps taken per day we need to aggregate the data per day (Note: At the moment, we will ignore the missing values from the dataset.).
-```{r aggPerDay}
+
+```r
 library(dplyr, warn.conflicts = FALSE)
 library(ggplot2)
 library(scales)
@@ -60,7 +76,8 @@ activity_day <- activity %>%
   summarize(steps = sum(steps, na.rm = TRUE))
 ```
 #### 2. If you do not understand the difference between a histogram and a barplot, research the difference between them. Make a histogram of the total number of steps taken each day
-```{r plotAggPerDay}
+
+```r
 # Plot historgramm
 ggplot(activity_day) +
     ggtitle("Total number of steps taken per day") +
@@ -73,28 +90,42 @@ ggplot(activity_day) +
     scale_x_continuous(name="Steps per days (steps)")
 ```
 
+![](PA1_template_files/figure-html/plotAggPerDay-1.png) 
+
 #### 3. Calculate and report the mean and median of the total number of steps taken per day
 
-```{r MeanMeadianAggPerDay}
+
+```r
 # Mean
 mean(activity_day$steps, na.rm=TRUE)
+```
 
+```
+## [1] 10766
+```
+
+```r
 # Median
 median(activity_day$steps, na.rm=TRUE)
 ```
 
+```
+## [1] 10765
+```
+
 As we can see on the graph the mean and the median are quiet close if we calculate the exact value we have :  
- - Mean : `r mean(activity_day$steps, na.rm=TRUE)`  
- - Median : `r median(activity_day$steps, na.rm=TRUE)`  
+ - Mean : 10766.19  
+ - Median : 10765  
 
 
 ## What is the average daily activity pattern?
 
 #### 1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
-To create the a such plot we need first to aggreage the data by steps.  
+To create the a such plot we need first to aggreage the data by step.  
 
-```{r plotDailyActivity}
+
+```r
 activity_daily <- activity %>%
   filter(!is.na(steps)) %>%
   group_by(interval) %>%
@@ -108,20 +139,39 @@ ggplot(activity_daily) +
     scale_x_continuous(name="Time (format hhmm)")
 ```
 
+![](PA1_template_files/figure-html/plotDailyActivity-1.png) 
+
 #### 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
-```{r maxDailyActivity}
+
+```r
 # Maximum number of steps 
 max(activity_daily$steps)
+```
 
+```
+## [1] 206
+```
+
+```r
 # 5-minutes interval
 activity_daily[which.max((activity_daily$steps)),]$interval
+```
 
+```
+## [1] 835
+```
+
+```r
 # Corresponding hour
 paste(trunc(activity_daily[which.max((activity_daily$steps)),]$interval/100), "h", (activity_daily[which.max((activity_daily$steps)),]$interval %% 100), "min", sep="")
 ```
 
-As we can see in the above plot, the maximum number of steps is **`r max(activity_daily$steps)`** and this is happening at the 5-minutes interval **`r activity_daily[which.max((activity_daily$steps)),]$interval`** corresponding to the time  **`r paste(trunc(activity_daily[which.max((activity_daily$steps)),]$interval/100), "h", (activity_daily[which.max((activity_daily$steps)),]$interval %% 100), "min", sep="")`**
+```
+## [1] "8h35min"
+```
+
+As we can see in the above plot, the maximum number of steps is **206.17** and this is happening at the 5-minutes interval **835** corresponding to the time  **8h35min**
 
 
 ## Imputing missing values
@@ -132,17 +182,22 @@ Note that there are a number of days/intervals where there are missing values (c
 
 Looking at the activity data set, we can identify NA using *is.na()* function
 
-```{r naSteps}
+
+```r
 # Number of entry with steps set to NA
 sum(is.na(activity$steps))
+```
+
+```
+## [1] 2304
 ```
 
 #### 2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 
 To fill the NA, we're going to replace them with the mean for that day. We need first to create a dataframe containing the mean per day.
 
-```{r meanActivityPerDay}
 
+```r
 activity_day_mean <- activity %>%
   filter(!is.na(steps)) %>%
   group_by(date) %>%
@@ -154,7 +209,8 @@ activity_day_mean <- activity %>%
 
 As describe above, we will use the mean step of that day to fill the NA. In case there are no data for the specific day, we will replace the value with 0.
 
-```{r fillNa}
+
+```r
 activity_na_fill = activity
 
 # loop over the data.frame
@@ -174,14 +230,14 @@ for(i in 1:dim(activity_na_fill)[1]) {
         }
     }
 }
-
 ```
 
 #### 4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
 To create the histogram we will used the previous code from the first section of the assignement. 
 
-```{r plotNaFillAggPerDay}
+
+```r
 activity_na_fill_day <- activity_na_fill %>%
   filter(!is.na(steps)) %>%
   group_by(date) %>%
@@ -198,17 +254,31 @@ ggplot(activity_na_fill_day) +
     scale_linetype_manual(name="Units", values=c(Median="dashed",Mean="longdash"), guide=FALSE) +
     scale_y_continuous(name="Frequency (days)")+
     scale_x_continuous(name="Steps per days (steps)")
+```
 
+![](PA1_template_files/figure-html/plotNaFillAggPerDay-1.png) 
+
+```r
 # Mean
 mean(activity_na_fill_day$steps, na.rm=TRUE)
+```
 
+```
+## [1] 9354
+```
+
+```r
 # Median
 median(activity_na_fill_day$steps, na.rm=TRUE)
 ```
 
+```
+## [1] 10395
+```
+
 As we can see, both mean and median as been impacted by the changes, those numbers are lower that the previous one.  
- - **Mean fill NA** : `r mean(activity_na_fill_day$steps, na.rm=TRUE)` / **Mean** : `r mean(activity_day$steps, na.rm=TRUE)`  
- - **Median fill NA** : `r median(activity_na_fill_day$steps, na.rm=TRUE)` / **Median** : `r median(activity_day$steps, na.rm=TRUE)`  
+ - **Mean fill NA** : 9354.23 / **Mean** : 10766.19  
+ - **Median fill NA** : 10395 / **Median** : 10765  
 
 This might is most probably due to the *NA* replaced with a 0 when no data for that day was available.
 
@@ -217,7 +287,8 @@ This might is most probably due to the *NA* replaced with a 0 when no data for t
 #### For this part the weekdays() function may be of some help here. Use the dataset with the filled-in missing values for this part.  
 
 Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.  
-```{r weeklyActivity}
+
+```r
 # Set all week day to weekday
 activity_na_fill$type = "weekday";
 activity_na_fill[weekdays(activity_na_fill$date) %in% c("Saturday","Sunday"),]$type = "weekend";
@@ -227,7 +298,8 @@ activity_na_fill[weekdays(activity_na_fill$date) %in% c("Saturday","Sunday"),]$t
 
 Find below the plots showing the time series plot of the 5-minutes interval and the average number of steps. The plot has been divided into 2 sections for the week days and the week end.
 
-```{r weeklyActivityPlot}
+
+```r
 activity_na_fill_daily <- activity_na_fill %>%
   group_by(type, interval) %>%
   select(type, interval, steps) %>%
@@ -240,3 +312,5 @@ ggplot(activity_na_fill_daily) +
     scale_y_continuous(name="Steps (number of steps)") +
     scale_x_continuous(name="Time (format hhmm)")
 ```
+
+![](PA1_template_files/figure-html/weeklyActivityPlot-1.png) 
